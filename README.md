@@ -92,7 +92,7 @@ If everything went well, your doorbell should ring when you press the doorbell b
 
 # The inner workings of the doorbell script
 
-The script reads the GPIO pins on the Raspberry Pi. The 3.3V power supply is used for the doorbell button. GPIO pin 24 - right next to the 3.3V pin - is used as a sensor to detect if there is voltage. When someone rings the doorbell, the circuit closes and pin 17 senses power.
+The script reads the GPIO pins on the Raspberry Pi. The 3.3V DC power supply is used for the doorbell button. GPIO pin 24 - right next to the 3.3V pin - is used as a sensor to detect power. When someone presses the doorbell button, the circuit closes and pin 17 senses power.
 
 Then the script checks if there is a doorbell within a time frame, and if so, a relay is switched - GPIO pin 17 - to actually sound the doorbell.
 
