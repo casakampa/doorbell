@@ -64,7 +64,7 @@ The doorbell is installed in a virtual environment. The script itself contains v
 		nano /etc/supervisor/conf.d/doorbell.conf
 		````
 
-	* Copy the text below into the file and save it (ctrl + o):
+	* Copy the text below into the file:
 
 		````
 		[program:doorbell]
@@ -79,6 +79,13 @@ The doorbell is installed in a virtual environment. The script itself contains v
 		stdout_logfile = /var/log/doorbell.log
 		stderr_logfile = /var/log/doorbell_error.log
 		````
+
+	* Save the file and exit nano:
+
+		- ````Ctrl + o````
+		- ````Enter````
+		- ````Ctrl + x````
+		- ````Enter````
 
 	* Update the supervisor:
 
