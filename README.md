@@ -7,19 +7,19 @@ The doorbell is installed in a virtual environment. The script itself contains v
 
 1. Become root
 
-	````shell
+	````bash
 	sudo -i
 	````
 
 2. Create a virtual environment:
 
-	````shell
+	````bash
 	python3 -m venv /home/user/doorbell/.venv/
 	````
 
 3. Open the virtual environment:
 
-	````shell
+	````bash
 	source /home/user/doorbell/.venv/bin/activate
 	````
 
@@ -31,7 +31,7 @@ The doorbell is installed in a virtual environment. The script itself contains v
 
 	*  Create the file ````doorbell.py```` file (_I use nano, but you can use the editor you prefer_):
 
-		````shell
+		````bash
 		nano /home/user/doorbell/doorbell.py
 		````
 
@@ -46,13 +46,13 @@ The doorbell is installed in a virtual environment. The script itself contains v
 
 	* Leave the virtual environment:
 
-		````shell
+		````bash
 		exit
 		````
 
 8. Become root again:
 
-	````shell
+	````bash
 	sudo -i
 	````
 
@@ -60,7 +60,7 @@ The doorbell is installed in a virtual environment. The script itself contains v
 
 	* Create a new file
 
-		````shell
+		````bash
 		nano /etc/supervisor/conf.d/doorbell.conf
 		````
 
@@ -89,7 +89,7 @@ The doorbell is installed in a virtual environment. The script itself contains v
 
 	* Update the supervisor:
 
-		````shell
+		````bash
 		supervisorctl reread
 		supervisorctl update
 		supervisorctl status
@@ -99,11 +99,9 @@ If everything went well, your doorbell should ring when you press the doorbell b
 
 # The inner workings of the doorbell script
 
-The script reads the GPIO pins on the Raspberry Pi. The 3.3V DC power supply is used for the doorbell button. GPIO pin 24 - right next to the 3.3V pin - is used as a sensor to detect power. When someone presses the doorbell button, the circuit closes and GPIO pin 24 senses power.
+The script reads the GPIO pins on the Raspberry Pi. The 3.3V DC power supply is used for the doorbell button. GPIO pin 24 - right next to the 3.3V pin - is used as a sensor to detect power. When someone presses the doorbell button, the circuit closes and GPIO pin 24 detects power.
 
-Then the script checks if there is a doorbell within a time frame, and if so, a relay is switched - GPIO pin 17 - to actually sound the doorbell.
-
-At the same time, a message is sent to Home Assistant via MQTT to perform some automations.
+Then the script checks if someone presses the doorbell button between certain times, and if so, switches a relay - controlled by GPIO pin 17 - to trigger the real doorbell. At the same time, a message is sent to Home Assistant via MQTT to perform [some automations](https://github.com/mvandek/home-assistant-config/blob/master/automations/deurbel.yaml) related to the doorbell.
 
 # Hardware
 
