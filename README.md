@@ -110,3 +110,7 @@ The following hardware is used to make all this possible:
 * Raspberry Pi 3 Model B
 * Doorbell button - the most standard version that can be found online
 * 1 channel relay board - connected to the [5v power pins](https://pinout.xyz/pinout/pin2_5v_power) of the Raspberry Pi
+
+## Wiring the doorbell
+
+The doorbell wiring is connected to the 1 channel relay as normally open (NO). A normally open relay will switch power ON for a circuit when the coil is activated.
