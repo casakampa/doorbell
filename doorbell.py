@@ -90,12 +90,12 @@ def send_offline_status():
     client.disconnect()
 
 def chime():
-    GPIO.output(chime_gpio, GPIO.HIGH)                                                                      # Switch relais to activate chime
+    GPIO.output(chime_gpio, GPIO.LOW)                                                                       # Switch relais to activate chime
     sleep(0.2)                                                                                              # Let's make it sound like a doorbell should sound
-    GPIO.output(chime_gpio, GPIO.LOW)                                                                       # Switch relais back to deactivate chime
+    GPIO.output(chime_gpio, GPIO.HIGH)                                                                      # Switch relais back to deactivate chime
 
 def no_chime():
-    GPIO.output(chime_gpio, GPIO.LOW)                                                                       # Make sure the chime is deactivated
+    GPIO.output(chime_gpio, GPIO.HIGH)                                                                      # Make sure the chime is deactivated
 
 def button_pressed(channel):
     if GPIO.input(button_gpio):                                                                             # If input is HIGH
@@ -117,7 +117,7 @@ def logic():
     GPIO.setup(button_gpio, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     logging.info("Pin 24 is set for doorbell button")
 
-    GPIO.setup(chime_gpio, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(chime_gpio, GPIO.OUT, initial=GPIO.HIGH)
     logging.info("Pin 17 is set for doorbell chime")
 
     send_online_status()
