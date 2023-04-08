@@ -1,32 +1,31 @@
 #!/usr/bin/env python3
 
-import signal                                                           # Need to find out
-import sys                                                              # Need to find out
-import logging                                                          # For logging function
-import RPi.GPIO as GPIO                                                 # To read the GPIO pins
-from time import sleep                                                  # To make something wait for it
-from datetime import datetime, time                                     # Needed to do some calculations based on time
-from pytz import timezone                                               # Needed to make sure the checked time is according to the right timezone
-import paho.mqtt.client as mqtt                                         # For MQTT message sending
-import threading                                                        # Threaded? Dunno, maybe it works
+import signal
+import sys
+import logging
+import RPi.GPIO as GPIO
+from time import sleep
+from datetime import datetime, time
+from pytz import timezone
+import paho.mqtt.client as mqtt
 
 ### Variables
 
 # Logging
-logging.basicConfig(filename='doorbell.log',                            # Log output
-                    format='%(asctime)s - %(levelname)s - %(message)s', # Formatting of log entries
-                    level=logging.INFO)                                 # Minimal logging level
+logging.basicConfig(filename='doorbell.log',
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 # GPIO pins
-button_gpio = 24                                                        # Input button
-chime_gpio = 17                                                         # Output button
+button_gpio = 24
+chime_gpio = 17
 
 # MQTT settings
 mqtt_client = "pibell"
 mqtt_user = "user"
 mqtt_password = "password"
-mqtt_broker_address = "192.168.2.1"
-mqtt_broker_port = 1883
+mqtt_address = "192.168.2.1"
+mqtt_port = 1883
 mqtt_button_topic = "doorbell/button"
 mqtt_status_topic = "doorbell/status"
 payload_on = "ON"
@@ -43,70 +42,70 @@ timezone = timezone("Europe/Amsterdam")
 
 ### Functions
 
-def is_time_between(begin_time, end_time, check_time=None):                                                 # Slightly changed from source: from https://stackoverflow.com/questions/10048249/how-do-i-determine-if-current-time-is-within-a-specified-range-using-pythons-da
+def is_time_between(begin_time, end_time, check_time=None):
     # If check time is not given, default to current UTC time
-    check_time = check_time or datetime.now(timezone).time()                                                # Set the variable
-    if begin_time < end_time:                                                                               # Check for condition
-        return check_time >= begin_time and check_time <= end_time                                          # Check if begin_time is equal or bigger than begin_time, and check if end_time is equal or lower than end_time
+    check_time = check_time or datetime.now(timezone).time()
+    if begin_time < end_time:
+        return check_time >= begin_time and check_time <= end_time
     else: # crosses midnight
-        return check_time >= begin_time or check_time <= end_time                                           # Check if one condition matches
+        return check_time >= begin_time or check_time <= end_time
 
 def shutdown_handler(sig, frame):
     send_offline_status()
     logging.info("State 'offline' is sent to topic")
     sleep(0.5)
     GPIO.cleanup()
-    logging.warning("GPIO cleaned up and doorbell will shutdown")                                           # Free al the pins
+    logging.warning("GPIO cleaned up and doorbell will shutdown")
     sys.exit(0)
 
-def send_initial_state_message():
-    client = mqtt.Client( mqtt_client )                                                                     # Define a new instance
-    client.username_pw_set( mqtt_user, mqtt_password )                                                      # Set the user account
-    client.connect( mqtt_broker_address, mqtt_broker_port )                                                 # Connect to the configured broker
-    client.publish( mqtt_button_topic, payload_off, 0, True )                                               # Send the second message
+def send_mqtt_message(topic, payload):
+    client = mqtt.Client(mqtt_client)
+    client.username_pw_set(mqtt_user, mqtt_password)
+    client.connect(mqtt_address, mqtt_port)
+    client.publish(topic, payload, 1, True)
     client.disconnect()
+
+def send_initial_state_message():
+    topic = mqtt_button_topic
+    payload = payload_off
+
+    send_mqtt_message(topic, payload)
 
 def send_doorbell_message():
-    client = mqtt.Client( mqtt_client )                                                                     # Define a new instance
-    client.username_pw_set( mqtt_user, mqtt_password )                                                      # Set the user account
-    client.connect( mqtt_broker_address, mqtt_broker_port )                                                 # Connect to the configured broker
-    client.publish( mqtt_button_topic, payload_on, 0, True )                                                # Send the first message
-    sleep(1)                                                                                                # Wait for it...
-    client.publish( mqtt_button_topic, payload_off, 0, True )                                               # Send the second message
-    client.disconnect()                                                                                     # Disconnect from the configured broker
+    topic = mqtt_button_topic
+    payload = payload_on
+    send_mqtt_message(topic, payload)
+    
+    sleep(1)
+    
+    payload = payload_off
+    send_mqtt_message(topic, payload)
 
 def send_online_status():
-    client = mqtt.Client( mqtt_client )                                                                     # Define a new instance
-    client.username_pw_set( mqtt_user, mqtt_password )                                                      # Set the user account
-    client.connect( mqtt_broker_address, mqtt_broker_port )                                                 # Connect to the configured broker
-    client.publish( mqtt_status_topic, status_online, 0, True )                                             # Send the second message
-    client.disconnect()
+    topic = mqtt_status_topic
+    payload = status_online
+
+    send_mqtt_message(topic, payload)
 
 def send_offline_status():
-    client = mqtt.Client( mqtt_client )                                                                     # Define a new instance
-    client.username_pw_set( mqtt_user, mqtt_password )                                                      # Set the user account
-    client.connect( mqtt_broker_address, mqtt_broker_port )                                                 # Connect to the configured broker
-    client.publish( mqtt_status_topic, status_offline, 0, True )                                            # Send the second message
-    client.disconnect()
+    topic = mqtt_status_topic
+    payload = status_offline
+
+    send_mqtt_message(topic, payload)
 
 def chime():
-    GPIO.output(chime_gpio, GPIO.LOW)                                                                       # Switch relais to activate chime
-    sleep(0.2)                                                                                              # Let's make it sound like a doorbell should sound
-    GPIO.output(chime_gpio, GPIO.HIGH)                                                                      # Switch relais back to deactivate chime
-
-def no_chime():
-    GPIO.output(chime_gpio, GPIO.HIGH)                                                                      # Make sure the chime is deactivated
+    GPIO.output(chime_gpio, GPIO.LOW)
+    sleep(0.2)
+    GPIO.output(chime_gpio, GPIO.HIGH)
 
 def button_pressed(channel):
-    if GPIO.input(button_gpio):                                                                             # If input is HIGH
-       send_doorbell_message()                                                                              # Activate function send_mqtt_message()
-       if is_time_between( time(not_before_hour,not_before_minutes),                                        # Check before time
-                           time(not_after_hour,not_after_minutes) ):                                        # Check after time
-          chime()                                                                                           # Activate function chime()
+    if GPIO.input(button_gpio):
+       send_doorbell_message()
+       if is_time_between( time(not_before_hour,not_before_minutes),
+                           time(not_after_hour,not_after_minutes) ):
+          chime()
        else:
           logging.warning("Someone rang outside of ring times")
-    else:
-       no_chime()                                                                                           # Activate function no_chime()
 
 def logic():
     logging.info("Starting doorbell script")
