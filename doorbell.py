@@ -59,11 +59,14 @@ def shutdown_handler(sig, frame):
     sys.exit(0)
 
 def send_mqtt_message(topic, payload):
-    client = mqtt.Client(mqtt_client)
-    client.username_pw_set(mqtt_user, mqtt_password)
-    client.connect(mqtt_address, mqtt_port)
-    client.publish(topic, payload, 1, True)
-    client.disconnect()
+    try:
+        client = mqtt.Client(mqtt_client)
+        client.username_pw_set(mqtt_user, mqtt_password)
+        client.connect(mqtt_address, mqtt_port)
+        client.publish(topic, payload, 1, True)
+        client.disconnect()
+    except Exception as e:
+        logging.error(f"An error occurred while sending MQTT message: {e}")
 
 def send_initial_state_message():
     topic = mqtt_button_topic
