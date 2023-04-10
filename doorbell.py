@@ -68,6 +68,9 @@ def send_mqtt_message(topic, payload):
         client.disconnect()
     except Exception as e:
         logging.error(f"An error occurred while sending MQTT message: {e}")
+        GPIO.cleanup()
+        logging.error("Could not start without errors, check the logs for errors and other information. Exiting...")
+        sys.exit(0)
 
 def send_initial_state_message():
     topic = mqtt_button_topic
