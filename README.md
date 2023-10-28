@@ -1,6 +1,6 @@
 # Doorbell
 
-The doorbell is installed in a virtual environment. The script itself contains various functions that are [explained](#the-inner-workings-of-the-doorbell-script) below the installation steps. And if you want to build this yourself, look at the [hardware](#hardware) section
+The doorbell is installed as a systemd-service. The script itself contains various functions that are [explained](#the-inner-workings-of-the-doorbell-script) below the installation steps. And if you want to build this yourself, take a look at the [hardware](#hardware) section.
 
 ## Steps for installation:
 
@@ -49,6 +49,7 @@ The doorbell is installed in a virtual environment. The script itself contains v
 		[Service]
 		ExecStart=/usr/bin/python3 /home/user/doorbell/doorbell.py
 		Restart=always
+  		User=root
 
 		[Install]
 		WantedBy=multi-user.target
@@ -91,16 +92,16 @@ If everything went well, your doorbell should ring when you press the doorbell b
 
 The script reads the GPIO pins on the Raspberry Pi. The 3.3V DC power supply is used for the doorbell button. GPIO pin 24 - right next to the 3.3V pin - is used as a sensor to detect power. When someone presses the doorbell button, the circuit closes and GPIO pin 24 detects power.
 
-Then the script checks if someone presses the doorbell button between certain times, and if so, switches a relay - controlled by GPIO pin 17 - to trigger the real doorbell. At the same time, a message is sent to Home Assistant via MQTT to perform [some automations](https://github.com/mvandek/home-assistant-config/blob/master/automations/deurbel.yaml) related to the doorbell.
+Then the script checks if someone presses the doorbell button between certain times, and if so, switches a relay - controlled by GPIO pin 17 - to trigger the real doorbell. At the same time, a message is sent to Home Assistant via MQTT to perform [some automations](https://github.com/casakampa/home-assistant-config/blob/master/automations/deurbel.yaml) related to the doorbell.
 
 # Hardware
 
 The following hardware is used to make all this possible:
 
-* Raspberry Pi 3 Model B
-* Doorbell button - the most standard version that can be found online
-* 1 channel relay board - connected to the [5v power pins](https://pinout.xyz/pinout/pin2_5v_power) of the Raspberry Pi
+* Raspberry Pi 2 or higher
+* Doorbell push button - the most standard version that can be found online - connected to a 3.3V pin and a GPIO pin (I use GPIO physical pin 17 (3.3V) and 18 (GPIO pin 24) for detection).
+* [1 channel relay board](https://www.tinytronics.nl/shop/en/switches/relays/5v-relay-1-channel-high-active-or-low-active) - connected to the [5v power pins](https://pinout.xyz/pinout/pin2_5v_power) of the Raspberry Pi and GPIO pin 17
 
 ## Wiring the doorbell
 
-The doorbell wiring is connected to the 1 channel relay as normally open (NO). A normally open relay will switch power ON for a circuit when the coil is activated.
+The doorbell wiring is connected to the 1 channel relay as Normally Open (NO). A Normally Open relay will switch to Normally Closed (NC) when the coil is activated. This will result in the circuit being closed and so the doorbell will ring.
