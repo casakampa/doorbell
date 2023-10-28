@@ -99,7 +99,7 @@ Then the script checks if someone presses the doorbell button between certain ti
 The following hardware is used to make all this possible:
 
 * Raspberry Pi 2 or higher
-* Doorbell push button - the most standard version that can be found online - connected to a 3.3V pin and a GPIO pin (I use GPIO physical pin 17 (3.3V) and 18 (GPIO pin 24) for detection).
+* Doorbell push button - the most standard version that can be found online - connected to a 3.3V pin and a GPIO pin (I use physical pin 17 (3.3V) and 18 (GPIO pin 24) for detection).
 * [1 channel relay board](https://www.tinytronics.nl/shop/en/switches/relays/5v-relay-1-channel-high-active-or-low-active) - connected to the [5v power pins](https://pinout.xyz/pinout/pin2_5v_power) of the Raspberry Pi and GPIO pin 17
 
 ## Wiring the doorbell
